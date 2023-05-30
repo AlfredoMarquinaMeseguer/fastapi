@@ -6,9 +6,9 @@ authors = ["DeviousLab <deviouslab@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-fastapi = "^0.80.0"
-uvicorn = "^0.18.3"
+python = "3.10"
+fastapi = "0.95.2"
+uvicorn = "0.21.1"
 
 [tool.poetry.dev-dependencies]
 
