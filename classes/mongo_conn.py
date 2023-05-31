@@ -56,15 +56,15 @@ def obtain_collection_environ(collection: AvailableCollection) -> pymongo.collec
 
 
 def connect_to_offers() -> pymongo.collection.Collection:
-    return obtain_collection_file(AvailableCollection.OFFERS)
+    return obtain_collection_environ(AvailableCollection.OFFERS)
 
 
 def connect_to_users() -> pymongo.collection.Collection:
-    return obtain_collection_file(AvailableCollection.USERS)
+    return obtain_collection_environ(AvailableCollection.USERS)
 
 
 def connect_to_petitions() -> pymongo.collection.Collection:
-    return obtain_collection_file(AvailableCollection.PETITIONS)
+    return obtain_collection_environ(AvailableCollection.PETITIONS)
 
 
 def update_env_from_file(file_path):
