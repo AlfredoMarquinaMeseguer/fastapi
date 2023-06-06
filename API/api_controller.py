@@ -1,5 +1,6 @@
+import pprint
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, List
 from typing_extensions import Annotated
 import bson
 from fastapi import Depends, HTTPException, status
@@ -119,11 +120,8 @@ def login_access_token_controller(form_data):
 
 
 def read_own_petitions_controller(current_user):
-    return_dictionary = [i for i in mongo_conn.connect_to_petitions().find({"user": current_user.username})]
-
-    for i in return_dictionary:
-        i["mongo_id"] = str(i.pop("_id"))
-
+    return_dictionary: List[Petition] = [Petition.from_mongo(i).to_api() for i in
+                                         mongo_conn.connect_to_petitions().find({"user": current_user.username})]
     return return_dictionary
 
 

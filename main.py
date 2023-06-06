@@ -1,3 +1,4 @@
+from typing import List
 from typing_extensions import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
@@ -27,6 +28,14 @@ async def startup():
     print("Application started.")
 
 
+@app.post("/", response_model=dict)
+async def login_for_access_token():
+    return {"mensaje": "Perdona, pero aquí no hay API. Por favor ve a la pestaña docs o redocs para tener aceso a "
+                       "todas la funciones.",
+            "message": "Sorry, there is no API here. Please go to docs or redocs to have access to all the functions.",
+            }
+
+
 @app.post("/token", response_model=Token)
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
@@ -34,12 +43,17 @@ async def login_for_access_token(
     return login_access_token_controller(form_data)
 
 
-@app.get("/user/me/", response_model=User)
+@app.get("/user/me", response_model=User)
 async def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]):
+    """
+    List the information of the current activa user.
+    :param current_user: The token
+    :return: User information
+    """
     return current_user
 
 
-@app.get("/user/me/petitions/", response_model=list[Petition])
+@app.get("/user/me/petitions")
 async def read_own_petitions(current_user: Annotated[User, Depends(get_current_active_user)]):
     """List all the current user petitions
     :param current_user: The current active user

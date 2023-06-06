@@ -43,7 +43,7 @@ def obtain_collection_file(selected_collection: AvailableCollection) -> pymongo.
     return pymongo.MongoClient(mongo_connection)[db][collection]
 
 
-def obtain_collection_environ(collection: AvailableCollection) -> pymongo.collection.Collection:
+def obtain_collection_environ(selected_collection: AvailableCollection) -> pymongo.collection.Collection:
     """
     Obtains a mongo collection made from options in the environments variables.
     :param collection: Indicates collections to use.
@@ -52,7 +52,8 @@ def obtain_collection_environ(collection: AvailableCollection) -> pymongo.collec
     import os
     mongo_connection = os.environ.get(CONN)
     db = os.environ.get(DB)
-    return pymongo.MongoClient(mongo_connection)[db][collection.value]
+    collection = os.environ.get(selected_collection.value)
+    return pymongo.MongoClient(mongo_connection)[db][collection]
 
 
 def connect_to_offers() -> pymongo.collection.Collection:

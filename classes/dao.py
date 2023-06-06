@@ -5,8 +5,10 @@ Offer:
 """
 import copy
 import datetime
+import pprint
 import re
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Optional
 
 import pymongo
 from datetime import date
@@ -297,7 +299,10 @@ class Offer(BaseModel):
 
         mongo_dict = self.to_mongo()
         import classes.offer_consts as offer
+
         mongo_dict[offer.UPDATE_DATE] = date.today()
+        mongo_dict[offer.PETITION] = bson.ObjectId(str(mongo_dict[offer.PETITION]))
+
         return collection.update_one(mongo_filter, {'$set': mongo_dict}, upsert=True)
 
     # ******************************************* Validator methods ******************************************* #
@@ -334,20 +339,19 @@ class Offer(BaseModel):
 
 
 class Petition(BaseModel):
-    mongo_id: ObjectId | None = None
-    user: str = "anon"
     creation_datetime: datetime.datetime
     query: str
-    location: str | None = None
+    user: str = "anon"
+    location: Optional[str]
     disabled: bool = False
+    mongo_id: Optional[ObjectId]
 
     @classmethod
     def from_mongo(cls, input_dict: dict):
         mongo_dict = copy.deepcopy(input_dict)
-
         if "_id" in mongo_dict.keys():
-            mongo_dict["mongo_id"] = mongo_dict.pop("_id")
-
+            mongo_id = ObjectId(str(mongo_dict.pop("_id")))
+            mongo_dict["mongo_id"] = mongo_id
         return cls(**mongo_dict)
 
     def to_mongo(self):
