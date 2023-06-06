@@ -28,8 +28,8 @@ async def startup():
     print("Application started.")
 
 
-@app.post("/", response_model=dict)
-async def login_for_access_token():
+@app.get("/", response_model=dict)
+async def sorry():
     return {"mensaje": "Perdona, pero aquí no hay API. Por favor ve a la pestaña docs o redocs para tener aceso a "
                        "todas la funciones.",
             "message": "Sorry, there is no API here. Please go to docs or redocs to have access to all the functions.",

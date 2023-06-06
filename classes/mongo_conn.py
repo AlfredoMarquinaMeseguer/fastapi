@@ -46,7 +46,7 @@ def obtain_collection_file(selected_collection: AvailableCollection) -> pymongo.
 def obtain_collection_environ(selected_collection: AvailableCollection) -> pymongo.collection.Collection:
     """
     Obtains a mongo collection made from options in the environments variables.
-    :param collection: Indicates collections to use.
+    :param selected_collection: Indicates collections to use.
     :return: The PyMongo collections you where searching for.
     """
     import os
