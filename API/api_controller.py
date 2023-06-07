@@ -190,3 +190,17 @@ def query_offers_controller(query: OfferQuery, current_user):
         )
 
     return return_offers
+
+
+def get_public_ip():
+    import requests
+    try:
+        response = requests.get('https://api.ipify.org?format=json')
+        if response.status_code == 200:
+            data = response.json()
+            ip_address = data['ip']
+            return ip_address
+        else:
+            print('Error: Failed to retrieve IP address.')
+    except requests.exceptions.RequestException as e:
+        print('Error: {}'.format(e))
