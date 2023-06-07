@@ -197,9 +197,7 @@ def get_public_ip():
     try:
         response = requests.get('https://api.ipify.org?format=json')
         if response.status_code == 200:
-            data = response.json()
-            ip_address = data['ip']
-            return ip_address
+            return response.json()
         else:
             print('Error: Failed to retrieve IP address.')
     except requests.exceptions.RequestException as e:
