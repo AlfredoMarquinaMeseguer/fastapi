@@ -392,6 +392,29 @@ class User(BaseModel):
     disabled: bool | None = None
     permits: list[Permission]
 
+    @classmethod
+    def from_mongo(cls, input_dict: dict):
+        mongo_dict = copy.deepcopy(input_dict)
+        if "_id" in mongo_dict.keys():
+            mongo_id = ObjectId(str(mongo_dict.pop("_id")))
+            mongo_dict["mongo_id"] = mongo_id
+        return cls(**mongo_dict)
+
+    def to_mongo(self):
+        dictionary = {}
+        for key, value in dict(self).items():
+            if value is not None:
+                dictionary[key] = value
+
+        if "mongo_id" in dictionary.keys():
+            dictionary["_id"] = dictionary.pop("mongo_id")
+
+        return dictionary
+
+    def save(self):
+        mfilter = {"user": self.username}
+        return mongo_conn.connect_to_petitions().update_one(mfilter, {'$set': self.to_mongo()}, upsert=True)
+
 
 class UserInDB(User):
     hashed_password: str
@@ -400,11 +423,12 @@ class UserInDB(User):
         return {key: value for key, value in dict(self).items() if value is not None}
 
     def save(self):
+        print("save")
         mongo_filter = {
             "username": self.username
         }
-
-        if self.mongo_id is not None:
-            mongo_filter["_id"] = self.mongo_id
-
-        return connect_to_users().update_one(mongo_filter, {"$set": self.to_mongo()}, upsert=True)
+        user_conn = connect_to_users()
+        print(user_conn.find_one(mongo_filter))
+        if user_conn.find_one(mongo_filter) is None:
+            return user_conn.insert_one(self.to_mongo())
+        return None

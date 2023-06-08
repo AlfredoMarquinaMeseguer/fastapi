@@ -1,4 +1,3 @@
-import pprint
 from datetime import datetime, timedelta
 from typing import Any, List
 from typing_extensions import Annotated
@@ -8,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from classes.dao import Offer, Petition, Permission, UserInDB
-from API.api_classes import PetitionRequest, OfferQuery, TokenData
+from API.api_classes import PetitionRequest, OfferQuery, TokenData, UserRequest
 from classes.dao import User
 from classes import offer_consts, mongo_conn
 from classes import connect_to_users
@@ -19,17 +18,6 @@ import os
 SECRET_KEY = "SECRET_KEY"
 ALGORITHM = "ALGORITHM"
 ACCESS_TOKEN_TIME_DAYS = "ACCESS_TOKEN_TIME_DAYS"
-#
-# fake_users_db = {
-#     "johndoe": {
-#         "username": "johndoe",
-#         "full_name": "John Doe",
-#         "email": "johndoe@example.com",
-#         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-#         "disabled": False,
-#         "permits": []
-#     }
-# }
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -125,10 +113,15 @@ def read_own_petitions_controller(current_user):
     return return_dictionary
 
 
-def create_user_controller(user, current_user):
-    if Permission.ADMIN.value in current_user.permits:
-        print(user)
-        return user
+def create_user_controller(user_request: UserRequest, current_user):
+    print(current_user.permits)
+
+    if Permission.ADMIN in current_user.permits:
+        new_user = dict(user_request)
+        new_user["hashed_password"] = pwd_context.hash(new_user.pop("password"))  # Spaghetti Time
+        if UserInDB(**new_user).save() is None:
+            return {"message": f"Username {user_request.username} is already taken."}
+        return {"message": "The user was correctly created"}
 
 
 def make_petition_controller(petition_request: PetitionRequest,
@@ -157,7 +150,7 @@ def obtain_data_controller(petition_id: str, current_user):
     if current_user.disabled:
         return {"message": "Sorry the current user is disabled"}
 
-    a = mongo_conn.connect_to_offers().find({offer_consts.PETITION: petition_id})
+    a = mongo_conn.connect_to_offers().find({offer_consts.PETITION: bson.ObjectId(petition_id)})
 
     dictionary = []
     for i in a:
@@ -190,15 +183,3 @@ def query_offers_controller(query: OfferQuery, current_user):
         )
 
     return return_offers
-
-
-def get_public_ip():
-    import requests
-    try:
-        response = requests.get('https://api.ipify.org?format=json')
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print('Error: Failed to retrieve IP address.')
-    except requests.exceptions.RequestException as e:
-        print('Error: {}'.format(e))

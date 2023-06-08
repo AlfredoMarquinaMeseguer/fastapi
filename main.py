@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 import classes.mongo_conn
 from API.api_controller import login_access_token_controller, get_current_active_user, read_own_petitions_controller, \
     make_petition_controller, create_user_controller, list_petitions_controller, obtain_data_controller, \
-    query_offers_controller, get_public_ip
+    query_offers_controller
 from API.api_classes import PetitionRequest, OfferQuery, Token, UserRequest
 from classes.dao import User, Petition, Offer
 
@@ -34,11 +34,6 @@ async def sorry():
                        "todas la funciones.",
             "message": "Sorry, there is no API here. Please go to docs or redocs to have access to all the functions.",
             }
-
-
-@app.get("/a", response_model=dict)
-async def sorry():
-    return get_public_ip()
 
 
 @app.post("/token", response_model=Token)
