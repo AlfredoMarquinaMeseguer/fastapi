@@ -95,7 +95,8 @@ async def query_offers(query: OfferQuery,
                        current_user: Annotated[User, Depends(get_current_active_user)]):
     return query_offers_controller(query, current_user)
 
-@app.get("ip")
+
+@app.get("/ip")
 async def ip():
-    import  requests
+    import requests
     return requests.get('https://api.ipify.org?format=json').json()
