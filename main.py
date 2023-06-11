@@ -5,11 +5,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 import classes.mongo_conn
 from API.api_controller import login_access_token_controller, get_current_active_user, read_own_petitions_controller, \
     make_petition_controller, create_user_controller, list_petitions_controller, obtain_data_controller, \
-    query_offers_controller
+    query_offers_controller, delete_offers_controller, delete_petitions_controller
 from API.api_classes import PetitionRequest, OfferQuery, Token, UserRequest
 from classes.dao import User, Petition, Offer
 
-app = FastAPI()
+app = FastAPI(title="Offer scraper",
+              description="An api for obtaining offers from different parts of the web.")
 
 
 # Define a startup event handler
@@ -78,6 +79,11 @@ async def list_petitions(current_user: Annotated[User, Depends(get_current_activ
     return list_petitions_controller(current_user)
 
 
+@app.delete("/petition/delete")
+async def delete_petitions(petition_id: str, current_user: Annotated[User, Depends(get_current_active_user)]):
+    return delete_petitions_controller(petition_id, current_user)
+
+
 @app.get("/offer/obtain")
 async def obtain_data(petition_id: str,
                       current_user: Annotated[User, Depends(get_current_active_user)]):
@@ -94,6 +100,12 @@ async def obtain_data(petition_id: str,
 async def query_offers(query: OfferQuery,
                        current_user: Annotated[User, Depends(get_current_active_user)]):
     return query_offers_controller(query, current_user)
+
+
+@app.delete("/offer/delete", response_model=dict[str, str])
+async def delete_offers(query_id: str,
+                        current_user: Annotated[User, Depends(get_current_active_user)]):
+    return delete_offers_controller(query_id, current_user)
 
 
 @app.get("/ip")

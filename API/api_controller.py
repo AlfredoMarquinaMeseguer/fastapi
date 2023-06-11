@@ -145,6 +145,20 @@ def list_petitions_controller(current_user):
 
     return dictionary
 
+def delete_petitions_controller(petition_id: str, current_user):
+    petition_object_id = bson.ObjectId(petition_id)
+    petition = mongo_conn.connect_to_petitions().find_one({"_id": petition_object_id})
+
+    if petition is None:
+        return {"message": f"The petition {petition_id} does not exist."}
+
+    if petition.get("username") == current_user.username:
+        mongo_conn.connect_to_offers().delete_many({"petition_id": petition_object_id})
+        mongo_conn.connect_to_petitions().delete_one({"_id": petition_object_id})
+        return {"message": f"The petition {petition_id} has been deleted."}
+
+    return {"message": f"The petition {petition_id} does not belong to {current_user.username}."}
+
 
 def obtain_data_controller(petition_id: str, current_user):
     if current_user.disabled:
@@ -183,3 +197,29 @@ def query_offers_controller(query: OfferQuery, current_user):
         )
 
     return return_offers
+
+
+def delete_offers_controller(query_id, current_user: User):
+    o_query_id = bson.ObjectId(query_id)
+
+    offer = mongo_conn.connect_to_offers().find_one({"_id": o_query_id})
+
+    if offer is None:
+        return {"message": f"The offer with id {query_id} does not exist."}
+
+    petition_id = offer.get("petition_id")
+    if isinstance(petition_id, str):
+        petition_id = bson.ObjectId(petition_id)
+
+    petition = mongo_conn.connect_to_petitions().find_one({"_id": petition_id})
+
+    if petition is None:
+        mongo_conn.connect_to_offers().delete_many({"petition_id": petition_id})
+        return {"message": "The petition of this offer does not exists. The offer, along with all the other offers of "
+                           "this petition, have been deleted."}
+
+    if petition.get("user") != current_user.username:
+        return {"message": f"The offer with id {query_id} does not belong to this user."}
+    # 64820d89573064f42b83de9d
+    mongo_conn.connect_to_offers().delete_one({"_id": o_query_id})
+    return {"message": f"The offer {petition.get('title')} with id {query_id} was deleted."}
