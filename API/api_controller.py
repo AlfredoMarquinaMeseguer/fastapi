@@ -145,6 +145,7 @@ def list_petitions_controller(current_user):
 
     return dictionary
 
+
 def delete_petitions_controller(petition_id: str, current_user):
     petition_object_id = bson.ObjectId(petition_id)
     petition = mongo_conn.connect_to_petitions().find_one({"_id": petition_object_id})
@@ -152,7 +153,7 @@ def delete_petitions_controller(petition_id: str, current_user):
     if petition is None:
         return {"message": f"The petition {petition_id} does not exist."}
 
-    if petition.get("username") == current_user.username:
+    if petition.get("user") == current_user.username:
         mongo_conn.connect_to_offers().delete_many({"petition_id": petition_object_id})
         mongo_conn.connect_to_petitions().delete_one({"_id": petition_object_id})
         return {"message": f"The petition {petition_id} has been deleted."}
@@ -220,6 +221,5 @@ def delete_offers_controller(query_id, current_user: User):
 
     if petition.get("user") != current_user.username:
         return {"message": f"The offer with id {query_id} does not belong to this user."}
-    # 64820d89573064f42b83de9d
     mongo_conn.connect_to_offers().delete_one({"_id": o_query_id})
     return {"message": f"The offer {petition.get('title')} with id {query_id} was deleted."}
